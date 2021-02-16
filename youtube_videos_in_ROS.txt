@@ -1,0 +1,41 @@
+Notes for the streaming of video from youtube into ROS.
+
+1) Install gstreamer
+
+sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc \
+gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 \
+gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+
+2) Optional create a python3 environment if you want to isolate the youtube-dl utility from your installation..
+mkdir ~/env
+python3 -m venv ~/env/env3
+source ~/env/env3/bin/activate
+
+3) Install python based interface to youtube.
+pip install youtube-dl
+
+4) Test gstreamer with a youtube URL, using the souphhtpsrc plug-in (this one is the isles of shoals tower webcam.):
+
+gst-launch-1.0 souphttpsrc is-live=true \
+location="$(youtube-dl --get-url https://youtu.be/bn_WK1SMmyM)" ! \
+decodebin ! videoconvert ! autovideosink
+
+4a) Get the URL manually for use with gscam:
+youtube-dl --get-url https://youtu.be/bn_WK1SMmyM
+
+5) Install the gscam ROS module:
+
+sudo apt install ros-melodic-gscam
+
+6) Set the gscam environment variable, GSCAM_CONFIG, cutting and pasting the result of 4a into PASTE_URL_HERE:
+
+export GSCAM_CONFIG='"<PASTE_URL_HERE>" | decodebin | videoconvert'
+
+Here's an example:
+export GSCAM_CONFIG='"https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1612584677/ei/hcIdYPK2JoKahwaArrbADw/ip/73.61.80.241/id/bn_WK1SMmyM.0/itag/95/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D136/hls_chunk_host/r3---sn-bvvbax-cvns.googlevideo.com/playlist_duration/30/manifest_duration/30/vprv/1/playlist_type/DVR/initcwndbps/20270/mh/sX/mm/44/mn/sn-bvvbax-cvns/ms/lva/mv/m/mvi/3/pl/21/dover/11/keepalive/yes/mt/1612562925/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,live,sgoap,sgovp,playlist_duration,manifest_duration,vprv,playlist_type/sig/AOq0QJ8wRAIgMWclA80WSgg9ArXN_8wNmYo6StbCoxpW5YkbqN75d_ACIDVOoY6KoQk6jkOd9ai6TnmZybLrVN9PxCCFEW4wrWWX/lsparams/hls_chunk_host,initcwndbps,mh,mm,mn,ms,mv,mvi,pl/lsig/AG3C_xAwRAIgX-kxlCib8ouMjkl5UfsRgB_R5f7QXHtaCyNvYZA_1xoCIFeX_fit_hSqUjoOqfrz2y7lz__IUMBxPRElGkZdIBrO/playlist/index.m3u8" ! decodebin ! videoconvert'
+
+7) Run gscam ros module:
+rosrun gscam gscam
+
+8) Monitor the image data stream within ROS with rqt
